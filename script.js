@@ -788,7 +788,7 @@ function cargarBorrador() {
 
 function eliminarBorrador() {
     localStorage.removeItem(BORRADOR_KEY);
-    console.log('🗑️ Borrador eliminado');
+    console.log(' Borrador eliminado');
 }
 
 function mostrarModalBorrador(borrador) {
@@ -811,8 +811,10 @@ function mostrarModalBorrador(borrador) {
 function configurarBotonesBorrador() {
     const modal = document.getElementById('borradorModal');
     const btnRecuperar = document.getElementById('btnRecuperarBorrador');
+    const btnDescartar = document.getElementById('btnDescartarBorrador');  // ← AGREGAR
     const btnCerrar = document.getElementById('cerrarBorradorBtn');
     
+    // Botón RECUPERAR
     if (btnRecuperar) {
         btnRecuperar.onclick = function(e) {
             e.preventDefault();
@@ -824,6 +826,17 @@ function configurarBotonesBorrador() {
         };
     }
     
+    // Botón DESCARTAR - NUEVO
+    if (btnDescartar) {
+        btnDescartar.onclick = function(e) {
+            e.preventDefault();
+            eliminarBorrador();
+            if (modal) modal.style.display = 'none';
+            mostrarNotificacion(' Borrador descartado', 'info');
+        };
+    }
+    
+    // Botón CERRAR (X)
     if (btnCerrar) {
         btnCerrar.onclick = function(e) {
             e.preventDefault();
@@ -831,6 +844,7 @@ function configurarBotonesBorrador() {
         };
     }
     
+    // Cerrar al hacer clic fuera
     if (modal) {
         modal.onclick = function(e) {
             if (e.target === modal) {
@@ -1762,12 +1776,18 @@ function manejarCambioFiltros() {
     const selectCarrera = document.getElementById('selectCarrera');
     const selectSemestre = document.getElementById('selectSemestre');
     
+    // Obtener los valores seleccionados
     filtroCarreraActual = selectCarrera ? selectCarrera.value : '';
     filtroSemestreActual = selectSemestre ? selectSemestre.value : '';
     
+    console.log('Filtro carrera:', filtroCarreraActual);
+    console.log('Filtro semestre:', filtroSemestreActual);
+    
+    // Limpiar el buscador
     const buscador = document.getElementById('buscadorMaterias');
     if (buscador) buscador.value = '';
     
+    // Mostrar materias filtradas
     mostrarTodasLasMateriasDelFiltro();
 }
 
@@ -1778,57 +1798,123 @@ function mostrarTodasLasMateriasDelFiltro() {
     
     resultadosContainer.style.display = 'block';
     
-    let materiasAMostrar = [];
-    
+    // Si no hay filtros, mostrar todas las materias completas
     if (!filtroCarreraActual && !filtroSemestreActual) {
-        materiasAMostrar = [...todasLasMaterias];
-    } else {
-        materiasAMostrar = todasLasMaterias.filter(materia => {
-            const infoFiltrada = materia.info.filter(info => {
-                if (filtroCarreraActual) {
-                    const carreraKey = Object.keys(carrerasData).find(
-                        key => carrerasData[key].nombre === info.carrera
-                    );
-                    if (carreraKey !== filtroCarreraActual) return false;
-                }
-                if (filtroSemestreActual) {
-                    if (info.semestre !== parseInt(filtroSemestreActual)) return false;
-                }
-                return true;
-            });
-            return infoFiltrada.length > 0;
-        }).map(materia => {
-            const infoFiltrada = materia.info.filter(info => {
-                if (filtroCarreraActual) {
-                    const carreraKey = Object.keys(carrerasData).find(
-                        key => carrerasData[key].nombre === info.carrera
-                    );
-                    if (carreraKey !== filtroCarreraActual) return false;
-                }
-                if (filtroSemestreActual) {
-                    if (info.semestre !== parseInt(filtroSemestreActual)) return false;
-                }
-                return true;
-            });
-            return { nombre: materia.nombre, info: infoFiltrada };
+        renderizarListaMaterias(todasLasMaterias);
+        if (contador) contador.textContent = `${todasLasMaterias.length} materias`;
+        return;
+    }
+    
+    // Obtener el nombre real de la carrera seleccionada
+    let nombreCarreraSeleccionada = null;
+    if (filtroCarreraActual) {
+        const mapaNombres = {
+            'arquitectura': 'Arquitectura',
+            'civil': 'Ing. Civil',
+            'electromecanica': 'Ing. Electromecánica',
+            'ferroviaria': 'Ing. Ferroviaria',
+            'mecatronica': 'Ing. Mecatrónica',
+            'maestria_ambiental': 'Maestría en Ciencias Ambientales',
+            'maestria_negocios': 'Maestría en Administración de Negocios',
+            'doctorado_ambiental': 'Doctorado en Ciencias Ambientales'
+        };
+        nombreCarreraSeleccionada = mapaNombres[filtroCarreraActual];
+        
+        // Si no está en el mapa, intentar obtener de carrerasData
+        if (!nombreCarreraSeleccionada && carrerasData[filtroCarreraActual]) {
+            nombreCarreraSeleccionada = carrerasData[filtroCarreraActual].nombre;
+        }
+    }
+    
+    const semestreSeleccionado = filtroSemestreActual ? parseInt(filtroSemestreActual) : null;
+    
+    console.log('🔍 Filtro - Carrera:', filtroCarreraActual, '→', nombreCarreraSeleccionada);
+    console.log('🔍 Filtro - Semestre:', semestreSeleccionado);
+    
+    // Filtrar materias
+    let materiasFiltradas = [...todasLasMaterias];
+    
+    if (nombreCarreraSeleccionada) {
+        materiasFiltradas = materiasFiltradas.filter(materia => {
+            return materia.info.some(info => info.carrera === nombreCarreraSeleccionada);
         });
     }
     
-    if (contador) contador.textContent = `${materiasAMostrar.length} materias`;
+    if (semestreSeleccionado) {
+        materiasFiltradas = materiasFiltradas.filter(materia => {
+            return materia.info.some(info => info.semestre === semestreSeleccionado);
+        });
+    }
     
-    if (materiasAMostrar.length === 0) {
+    // Para cada materia, mostrar SOLO las carreras que cumplen con TODOS los filtros
+    const materiasParaMostrar = [];
+    
+    for (const materia of materiasFiltradas) {
+        // Filtrar la información de la materia
+        let infoFiltrada = [...materia.info];
+        
+        if (nombreCarreraSeleccionada) {
+            infoFiltrada = infoFiltrada.filter(info => info.carrera === nombreCarreraSeleccionada);
+        }
+        
+        if (semestreSeleccionado) {
+            infoFiltrada = infoFiltrada.filter(info => info.semestre === semestreSeleccionado);
+        }
+        
+        // Solo agregar la materia si tiene al menos una carrera que cumple los filtros
+        if (infoFiltrada.length > 0) {
+            materiasParaMostrar.push({
+                nombre: materia.nombre,
+                info: infoFiltrada
+            });
+        }
+    }
+    
+    // Ordenar alfabéticamente
+    materiasParaMostrar.sort((a, b) => a.nombre.localeCompare(b.nombre));
+    
+    if (contador) contador.textContent = `${materiasParaMostrar.length} materias`;
+    
+    if (materiasParaMostrar.length === 0) {
+        let mensaje = 'No hay materias disponibles';
+        if (nombreCarreraSeleccionada && semestreSeleccionado) {
+            mensaje = `No hay materias para ${nombreCarreraSeleccionada} en Semestre ${semestreSeleccionado}`;
+        } else if (nombreCarreraSeleccionada) {
+            mensaje = `No hay materias para ${nombreCarreraSeleccionada}`;
+        } else if (semestreSeleccionado) {
+            mensaje = `No hay materias en Semestre ${semestreSeleccionado}`;
+        }
+        
         resultadosLista.innerHTML = `
             <div class="resultado-sin-resultados">
                 <i class="fas fa-search"></i>
-                <p>No hay materias disponibles con los filtros seleccionados</p>
+                <p>${mensaje}</p>
                 <small>Prueba con otros filtros</small>
             </div>
         `;
         return;
     }
     
+    renderizarListaMaterias(materiasParaMostrar);
+}
+
+function renderizarListaMaterias(materias) {
+    const resultadosLista = document.getElementById('resultadosLista');
+    if (!resultadosLista) return;
+    
     resultadosLista.innerHTML = '';
-    materiasAMostrar.forEach(materia => {
+    materias.forEach(materia => {
+        const resultadoItem = crearResultadoItem(materia);
+        resultadosLista.appendChild(resultadoItem);
+    });
+}
+
+function renderizarListaMaterias(materias) {
+    const resultadosLista = document.getElementById('resultadosLista');
+    if (!resultadosLista) return;
+    
+    resultadosLista.innerHTML = '';
+    materias.forEach(materia => {
         const resultadoItem = crearResultadoItem(materia);
         resultadosLista.appendChild(resultadoItem);
     });
@@ -1922,11 +2008,19 @@ function crearResultadoItem(materia) {
     
     const estaSeleccionada = materiasSeleccionadas.some(m => m.nombre === materia.nombre);
     
+    // Verificar que materia.info existe
+    if (!materia.info || materia.info.length === 0) {
+        console.warn('Materia sin información:', materia);
+        return resultadoItem;
+    }
+    
     let infoTexto = '';
     materia.info.forEach((i, index) => {
         if (index > 0) infoTexto += ' • ';
         infoTexto += `${i.carrera} - Semestre ${i.semestre}`;
-        if (i.horas) infoTexto += ` (${i.horas} h/sem)`;
+        if (i.horas && i.horas !== null) {
+            infoTexto += ` (${i.horas} h/sem)`;
+        }
     });
     
     resultadoItem.innerHTML = `
@@ -3426,6 +3520,30 @@ const ThemeManager = {
         }
     }
 };
+
+function diagnosticarCarreras() {
+    console.log('=== DIAGNÓSTICO DE CARRERAS ===');
+    console.log('carrerasData:', carrerasData);
+    
+    // Lista de claves disponibles
+    console.log('Claves en carrerasData:', Object.keys(carrerasData));
+    
+    // Mostrar cada carrera con su nombre
+    Object.entries(carrerasData).forEach(([key, value]) => {
+        console.log(`  ${key} → "${value.nombre}"`);
+    });
+    
+    // Verificar primeras materias
+    console.log('\nPrimeras 5 materias con sus carreras:');
+    todasLasMaterias.slice(0, 5).forEach(m => {
+        console.log(`  ${m.nombre}:`);
+        m.info.forEach(i => {
+            console.log(`    - ${i.carrera} (Sem ${i.semestre})`);
+        });
+    });
+}
+
+diagnosticarCarreras();
 
 // ===== INICIALIZACIÓN PRINCIPAL =====
 async function inicializarAplicacion() {
