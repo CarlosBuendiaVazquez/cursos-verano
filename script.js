@@ -1185,22 +1185,29 @@ async function guardarMateriasAGODIC() {
 // ===== CARGAR MATERIAS GLOBALES CON CACHÉ =====
 
 async function cargarMateriasGlobales() {
-    if (ES_VERANO) {
-        // Versión Verano - usar catálogo unificado
-        console.log('📚 Cargando catálogo de cursos de verano...');
-        
+    console.log('📚 Cargando catálogo de cursos de verano...');
+    
+    // Limpiar datos existentes
+    carrerasDataENEJUNTrabajo = {};
+    carrerasDataAGODICTrabajo = {};
+    
+    try {
+        // Cargar desde PocketBase (si existe la colección)
+        let records = [];
         try {
-            const records = await pb.collection('cursos_verano_catalogo').getFullList();
-            
-            // Limpiar datos existentes
-            carrerasDataENEJUNTrabajo = {};
-            carrerasDataAGODICTrabajo = {};
-            
-            // Convertir al formato que usa el sistema
+            records = await pb.collection('cursos_verano_catalogo').getFullList();
+        } catch (e) {
+            console.log('⚠️ Colección cursos_verano_catalogo no encontrada, usando datos locales');
+        }
+        
+        if (records.length > 0) {
+            // Usar datos de PocketBase
             records.forEach(record => {
                 record.carreras.forEach(carreraInfo => {
                     const carreraKey = carreraInfo.carrera.toLowerCase().replace(/\s+/g, '_');
-                    const periodo = carreraInfo.semestre % 2 === 0 ? 'ene-jun' : 'ago-dic';
+                    const semestre = carreraInfo.semestre;
+                    // Determinar período solo para estructura interna (pero no filtrar)
+                    const periodo = semestre % 2 === 0 ? 'ene-jun' : 'ago-dic';
                     const targetData = periodo === 'ene-jun' ? carrerasDataENEJUNTrabajo : carrerasDataAGODICTrabajo;
                     
                     if (!targetData[carreraKey]) {
@@ -1212,112 +1219,28 @@ async function cargarMateriasGlobales() {
                     
                     targetData[carreraKey].materias.push({
                         nombre: record.nombre,
-                        semestre: carreraInfo.semestre,
+                        semestre: semestre,
                         horas: carreraInfo.horas || record.horas
                     });
                 });
             });
-            
-            console.log('✅ Catálogo de verano cargado');
-            return true;
-        } catch (error) {
-            console.error('❌ Error cargando catálogo:', error);
-            return false;
-        }
-    } else 
-        {
-
-    
-
-    
-    // INTENTAR OBTENER DEL CACHÉ PRIMERO
-    const materiasCached = Cache.get('materias_completas');
-    if (materiasCached) {
-        console.log('📦 Usando materias del caché');
-        
-        // Restaurar datos del caché
-        Object.keys(carrerasDataENEJUNTrabajo).forEach(key => delete carrerasDataENEJUNTrabajo[key]);
-        Object.keys(carrerasDataAGODICTrabajo).forEach(key => delete carrerasDataAGODICTrabajo[key]);
-        
-        Object.assign(carrerasDataENEJUNTrabajo, materiasCached.enejun);
-        Object.assign(carrerasDataAGODICTrabajo, materiasCached.agodic);
-        
-        return true;
-    }
-    
-    // SI NO HAY CACHÉ, CARGAR DE POCKETBASE (EN PARALELO)
-    try {
-        // Cargar ambas colecciones en paralelo
-        const [recordsENEJUN, recordsAGODIC] = await Promise.all([
-            pb.collection('materias_enejun').getFullList().catch(() => []),
-            pb.collection('materias_agodic').getFullList().catch(() => [])
-        ]);
-                
-        // Procesar ENE-JUN
-        if (recordsENEJUN.length > 0) {
-            Object.keys(carrerasDataENEJUNTrabajo).forEach(key => delete carrerasDataENEJUNTrabajo[key]);
-            
-            recordsENEJUN.forEach(record => {
-                const materiasConHoras = (record.materias || []).map(m => ({
-                    nombre: m.nombre,
-                    semestre: m.semestre,
-                    horas: m.horas || undefined
-                }));
-                
-                carrerasDataENEJUNTrabajo[record.carrera] = {
-                    nombre: record.nombreCarrera,
-                    materias: materiasConHoras
-                };
-            });
         } else {
-            console.log('⚠️ No hay materias ENE-JUN, usando locales');
+            // Fallback: usar datos locales de respaldo
+            console.log('📦 Usando datos locales de respaldo');
             Object.assign(carrerasDataENEJUNTrabajo, carrerasDataENEJUNOriginal);
-            // Guardar en segundo plano (no await)
-            guardarMateriasENEJUN().catch(e => console.warn('Error guardando ENE-JUN:', e));
-        }
-        
-        // Procesar AGO-DIC
-        if (recordsAGODIC.length > 0) {
-            Object.keys(carrerasDataAGODICTrabajo).forEach(key => delete carrerasDataAGODICTrabajo[key]);
-            
-            recordsAGODIC.forEach(record => {
-                const materiasConHoras = (record.materias || []).map(m => ({
-                    nombre: m.nombre,
-                    semestre: m.semestre,
-                    horas: m.horas || undefined
-                }));
-                
-                carrerasDataAGODICTrabajo[record.carrera] = {
-                    nombre: record.nombreCarrera,
-                    materias: materiasConHoras
-                };
-            });
-        } else {
-            console.log('⚠️ No hay materias AGO-DIC, usando locales');
             Object.assign(carrerasDataAGODICTrabajo, carrerasDataAGODICOriginal);
-            // Guardar en segundo plano (no await)
-            guardarMateriasAGODIC().catch(e => console.warn('Error guardando AGO-DIC:', e));
         }
         
-        // Guardar en caché para la próxima vez
-        const materiasParaCache = {
-            enejun: JSON.parse(JSON.stringify(carrerasDataENEJUNTrabajo)),
-            agodic: JSON.parse(JSON.stringify(carrerasDataAGODICTrabajo))
-        };
-        Cache.set('materias_completas', materiasParaCache, Cache._ttls.materias);
-        
+        console.log('✅ Catálogo de verano cargado');
         return true;
         
     } catch (error) {
-        console.error('❌ Error cargando materias:', error);
-        
+        console.error('❌ Error cargando catálogo:', error);
         // Fallback a datos locales
         Object.assign(carrerasDataENEJUNTrabajo, carrerasDataENEJUNOriginal);
         Object.assign(carrerasDataAGODICTrabajo, carrerasDataAGODICOriginal);
-        
         return false;
     }
-}
 }
 
 // ===== CARGAR PROFESORES GLOBALES CON CACHÉ =====
@@ -1386,11 +1309,38 @@ function actualizarVistaMaterias() {
     console.log('✅ Vista actualizada');
 }
 
-// ===== GENERAR LISTA GLOBAL DE MATERIAS (CON HORAS) =====
+// ===== GENERAR LISTA GLOBAL DE MATERIAS (VERSIÓN VERANO - SIN PERÍODOS) =====
 function generarListaGlobalMaterias() {
+    console.log('🔄 Generando lista global de cursos (sin filtrar por período)...');
+    
     const materiasMap = new Map();
     
-    Object.values(carrerasData).forEach(carrera => {
+    // Combinar materias de ENE-JUN y AGO-DIC
+    const todasLasCarreras = {};
+    
+    // Unificar ambas estructuras
+    Object.entries(carrerasDataENEJUNTrabajo).forEach(([key, carrera]) => {
+        if (!todasLasCarreras[key]) {
+            todasLasCarreras[key] = {
+                nombre: carrera.nombre,
+                materias: []
+            };
+        }
+        todasLasCarreras[key].materias.push(...carrera.materias);
+    });
+    
+    Object.entries(carrerasDataAGODICTrabajo).forEach(([key, carrera]) => {
+        if (!todasLasCarreras[key]) {
+            todasLasCarreras[key] = {
+                nombre: carrera.nombre,
+                materias: []
+            };
+        }
+        todasLasCarreras[key].materias.push(...carrera.materias);
+    });
+    
+    // Procesar todas las materias sin filtrar por semestre
+    Object.values(todasLasCarreras).forEach(carrera => {
         carrera.materias.forEach(materia => {
             const key = materia.nombre;
             if (!materiasMap.has(key)) {
@@ -1399,7 +1349,7 @@ function generarListaGlobalMaterias() {
             materiasMap.get(key).push({
                 carrera: carrera.nombre,
                 semestre: materia.semestre,
-                horas: materia.horas || null  // ← ASEGURAR QUE HORAS SE INCLUYE
+                horas: materia.horas
             });
         });
     });
@@ -1414,10 +1364,7 @@ function generarListaGlobalMaterias() {
     
     materiasGlobales.sort((a, b) => a.nombre.localeCompare(b.nombre));
     
-    // Verificar primera materia como ejemplo
-    if (materiasGlobales.length > 0) {
-    }
-    
+    console.log(`✅ Total de cursos únicos: ${materiasGlobales.length}`);
     return materiasGlobales;
 }
 
@@ -1685,6 +1632,7 @@ function configurarPanelAdmin() {
         });
     }
     
+    /*
     // Botones de período
     const btnENEJUN = document.getElementById('periodoENEJUN');
     const btnAGODIC = document.getElementById('periodoAGODIC');
@@ -1700,6 +1648,7 @@ function configurarPanelAdmin() {
             btnAGODIC.classList.remove('active');
         });
     }
+        
     
     if (btnAGODIC) {
         btnAGODIC.addEventListener('click', () => {
@@ -1712,7 +1661,8 @@ function configurarPanelAdmin() {
             btnENEJUN.classList.remove('active');
         });
     }
-    
+    */
+   
     // Botón Ver Encuestas
     const verEncuestasBtn = document.getElementById('verEncuestasBtn');
     if (verEncuestasBtn) {
@@ -2129,19 +2079,15 @@ window.cancelarOtroProfesor = function() {
 }
 
 
-// ===== FUNCIONES PARA FILTRO DE SEMESTRE =====
+// ===== ACTUALIZAR OPCIONES DE SEMESTRE (VERANO - TODOS LOS SEMESTRES) =====
 function actualizarOpcionesSemestre() {
     const selectSemestre = document.getElementById('selectSemestre');
     if (!selectSemestre) return;
     
     const valorActual = selectSemestre.value;
     
-    let semestres = [];
-    if (periodoActivo === 'ene-jun') {
-        semestres = [2, 4, 6, 8];
-    } else {
-        semestres = [1, 3, 5, 7, 9];
-    }
+    // En verano, mostrar TODOS los semestres del 1 al 9
+    const semestres = [1, 2, 3, 4, 5, 6, 7, 8, 9];
     
     let opcionesHTML = '<option value="">-- Todos los semestres --</option>';
     semestres.forEach(sem => {
@@ -5931,6 +5877,17 @@ setTimeout(() => {
         console.error('❌ Error al cargar borrador:', error);
     }
 }, 800);
+
+// Ocultar selector de período en versión verano
+const periodoSelector = document.querySelector('.periodo-selector');
+if (periodoSelector) {
+    periodoSelector.style.display = 'none';
+}
+// También ocultar el badge de período
+const periodoBadge = document.querySelector('.periodo-badge');
+if (periodoBadge) {
+    periodoBadge.style.display = 'none';
+}
 
 // 7. INICIALIZAR THEME MANAGER (MODO OSCURO)
 setTimeout(() => {
