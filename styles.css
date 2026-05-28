@@ -4605,3 +4605,39 @@ label {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
+
+/* Asegurar que la lista de exportación sea visible */
+#exportacionListaEncuestas {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    background: white;
+    margin-top: 10px;
+}
+
+.exportacion-item {
+    transition: background-color 0.2s ease;
+}
+
+.exportacion-item:hover {
+    background-color: #f8f9fa;
+}
+
+/* Modo oscuro */
+[data-theme="dark"] #exportacionListaEncuestas {
+    background: #1e1e1e;
+    border-color: #444;
+}
+
+[data-theme="dark"] .exportacion-item {
+    border-bottom-color: #444;
+}
+
+[data-theme="dark"] .exportacion-item:hover {
+    background-color: #2a2a2a;
+}
+
+[data-theme="dark"] .exportacion-item strong {
+    color: #e0e0e0;
+}

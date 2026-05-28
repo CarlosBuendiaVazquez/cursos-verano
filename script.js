@@ -22,7 +22,10 @@ const carrerasDataENEJUN = {
             { nombre: 'Urbanismo I', semestre: 6, horas: 4 },
             { nombre: 'Administración de Empresas Constructoras I', semestre: 8, horas: 4 },
             { nombre: 'Gestión Urbanística', semestre: 8, horas: 4 },
-            { nombre: 'Taller de Diseño VI', semestre: 8, horas: 8 }
+            { nombre: 'Taller de Diseño VI', semestre: 8, horas: 8 },
+            { nombre: 'Plan de Desarrollo Bioclimático y Sustentable', semestre: 8, horas: 5 },
+            { nombre: 'Arquitectura Urbana Sustentable para Zonas Turísticas', semestre: 8, horas: 5 },
+            { nombre: 'Sistemas de Automatizacion en Interiores', semestre: 8, horas: 5 }
         ]
     },
     'civil': {
@@ -165,7 +168,9 @@ const carrerasDataAGODIC = {
             { nombre: 'Taller de Investigación II', semestre: 7, horas: 4 },
             { nombre: 'Taller de Ética', semestre: 7, horas: 4 },
             { nombre: 'Urbanismo II', semestre: 7, horas: 4 },
-            { nombre: 'Administración de Empresas Constructoras II', semestre: 9, horas: 4 }
+            { nombre: 'Administración de Empresas Constructoras II', semestre: 9, horas: 4 },
+            { nombre: 'Plan de Negocios en arquitectura', semestre: 9, horas: 5 },
+            { nombre: 'Desarrollo de un Diseño Urbano Arquitectónico', semestre: 9, horas: 5 }
         ]
     },
     'civil': {
@@ -223,7 +228,7 @@ const carrerasDataAGODIC = {
             { nombre: 'Refrigeracion y Aire Acondicionado', semestre: 7, horas: 5 },
             { nombre: 'Máquinas y Equipos Térmicos II', semestre: 7, horas: 4 },
             { nombre: 'Sistemas Eléctricos de Potencia', semestre: 7, horas: 5 },
-            { nombre: 'Marco Legal en la Gestion Energetica', semestre: 7, horas: 5 },
+            { nombre: 'Marco Legal en la Gestión Energética', semestre: 7, horas: 5 },
             { nombre: 'Fuentes Alternas de Energía', semestre: 7, horas: 5 },
             { nombre: 'Energia Eolica', semestre: 9, horas: 5 },
             { nombre: 'Biocombustibles', semestre: 9, horas: 5 },
@@ -788,7 +793,7 @@ function cargarBorrador() {
 
 function eliminarBorrador() {
     localStorage.removeItem(BORRADOR_KEY);
-    console.log(' Borrador eliminado');
+    console.log('🗑️ Borrador eliminado');
 }
 
 function mostrarModalBorrador(borrador) {
@@ -811,10 +816,9 @@ function mostrarModalBorrador(borrador) {
 function configurarBotonesBorrador() {
     const modal = document.getElementById('borradorModal');
     const btnRecuperar = document.getElementById('btnRecuperarBorrador');
-    const btnDescartar = document.getElementById('btnDescartarBorrador');  // ← AGREGAR
+    const btnDescartar = document.getElementById('btnDescartarBorrador');
     const btnCerrar = document.getElementById('cerrarBorradorBtn');
     
-    // Botón RECUPERAR
     if (btnRecuperar) {
         btnRecuperar.onclick = function(e) {
             e.preventDefault();
@@ -826,17 +830,15 @@ function configurarBotonesBorrador() {
         };
     }
     
-    // Botón DESCARTAR - NUEVO
     if (btnDescartar) {
         btnDescartar.onclick = function(e) {
             e.preventDefault();
             eliminarBorrador();
             if (modal) modal.style.display = 'none';
-            mostrarNotificacion(' Borrador descartado', 'info');
+            mostrarNotificacion('🗑️ Borrador descartado', 'info');
         };
     }
     
-    // Botón CERRAR (X)
     if (btnCerrar) {
         btnCerrar.onclick = function(e) {
             e.preventDefault();
@@ -844,7 +846,6 @@ function configurarBotonesBorrador() {
         };
     }
     
-    // Cerrar al hacer clic fuera
     if (modal) {
         modal.onclick = function(e) {
             if (e.target === modal) {
@@ -1588,7 +1589,7 @@ window.seleccionarProfesor = async function(nombre) {
     const claveActual = document.getElementById('codigoProfesor').value.trim();
     
     if (!correoActual) {
-        mostrarNotificacion('📧 Por favor ingresa tu correo para buscar encuestas anteriores', 'info', 4000);
+        mostrarNotificacion(' Por favor ingresa tu correo para buscar encuestas anteriores', 'info', 4000);
     } else if (validarEmail(correoActual)) {
         let intentos = 0;
         const maxIntentos = 5;
@@ -1776,18 +1777,12 @@ function manejarCambioFiltros() {
     const selectCarrera = document.getElementById('selectCarrera');
     const selectSemestre = document.getElementById('selectSemestre');
     
-    // Obtener los valores seleccionados
     filtroCarreraActual = selectCarrera ? selectCarrera.value : '';
     filtroSemestreActual = selectSemestre ? selectSemestre.value : '';
     
-    console.log('Filtro carrera:', filtroCarreraActual);
-    console.log('Filtro semestre:', filtroSemestreActual);
-    
-    // Limpiar el buscador
     const buscador = document.getElementById('buscadorMaterias');
     if (buscador) buscador.value = '';
     
-    // Mostrar materias filtradas
     mostrarTodasLasMateriasDelFiltro();
 }
 
@@ -1798,14 +1793,12 @@ function mostrarTodasLasMateriasDelFiltro() {
     
     resultadosContainer.style.display = 'block';
     
-    // Si no hay filtros, mostrar todas las materias completas
     if (!filtroCarreraActual && !filtroSemestreActual) {
         renderizarListaMaterias(todasLasMaterias);
         if (contador) contador.textContent = `${todasLasMaterias.length} materias`;
         return;
     }
     
-    // Obtener el nombre real de la carrera seleccionada
     let nombreCarreraSeleccionada = null;
     if (filtroCarreraActual) {
         const mapaNombres = {
@@ -1820,7 +1813,6 @@ function mostrarTodasLasMateriasDelFiltro() {
         };
         nombreCarreraSeleccionada = mapaNombres[filtroCarreraActual];
         
-        // Si no está en el mapa, intentar obtener de carrerasData
         if (!nombreCarreraSeleccionada && carrerasData[filtroCarreraActual]) {
             nombreCarreraSeleccionada = carrerasData[filtroCarreraActual].nombre;
         }
@@ -1828,10 +1820,6 @@ function mostrarTodasLasMateriasDelFiltro() {
     
     const semestreSeleccionado = filtroSemestreActual ? parseInt(filtroSemestreActual) : null;
     
-    console.log('🔍 Filtro - Carrera:', filtroCarreraActual, '→', nombreCarreraSeleccionada);
-    console.log('🔍 Filtro - Semestre:', semestreSeleccionado);
-    
-    // Filtrar materias
     let materiasFiltradas = [...todasLasMaterias];
     
     if (nombreCarreraSeleccionada) {
@@ -1846,11 +1834,9 @@ function mostrarTodasLasMateriasDelFiltro() {
         });
     }
     
-    // Para cada materia, mostrar SOLO las carreras que cumplen con TODOS los filtros
     const materiasParaMostrar = [];
     
     for (const materia of materiasFiltradas) {
-        // Filtrar la información de la materia
         let infoFiltrada = [...materia.info];
         
         if (nombreCarreraSeleccionada) {
@@ -1861,7 +1847,6 @@ function mostrarTodasLasMateriasDelFiltro() {
             infoFiltrada = infoFiltrada.filter(info => info.semestre === semestreSeleccionado);
         }
         
-        // Solo agregar la materia si tiene al menos una carrera que cumple los filtros
         if (infoFiltrada.length > 0) {
             materiasParaMostrar.push({
                 nombre: materia.nombre,
@@ -1870,7 +1855,6 @@ function mostrarTodasLasMateriasDelFiltro() {
         }
     }
     
-    // Ordenar alfabéticamente
     materiasParaMostrar.sort((a, b) => a.nombre.localeCompare(b.nombre));
     
     if (contador) contador.textContent = `${materiasParaMostrar.length} materias`;
@@ -1896,17 +1880,6 @@ function mostrarTodasLasMateriasDelFiltro() {
     }
     
     renderizarListaMaterias(materiasParaMostrar);
-}
-
-function renderizarListaMaterias(materias) {
-    const resultadosLista = document.getElementById('resultadosLista');
-    if (!resultadosLista) return;
-    
-    resultadosLista.innerHTML = '';
-    materias.forEach(materia => {
-        const resultadoItem = crearResultadoItem(materia);
-        resultadosLista.appendChild(resultadoItem);
-    });
 }
 
 function renderizarListaMaterias(materias) {
@@ -2008,7 +1981,6 @@ function crearResultadoItem(materia) {
     
     const estaSeleccionada = materiasSeleccionadas.some(m => m.nombre === materia.nombre);
     
-    // Verificar que materia.info existe
     if (!materia.info || materia.info.length === 0) {
         console.warn('Materia sin información:', materia);
         return resultadoItem;
@@ -2362,7 +2334,6 @@ function crearCeldaHorarioLimpia(dia, horaInicio, horaFin) {
     
     celda.innerHTML = `<span class="bloque-hora">${bloqueHora}</span><span class="periodo">${periodo}</span>`;
     
-    // Eventos táctiles simplificados
     celda.addEventListener('touchstart', (e) => {
         e.preventDefault();
         const touch = e.touches[0];
@@ -2396,7 +2367,6 @@ function crearCeldaHorarioLimpia(dia, horaInicio, horaFin) {
         document.addEventListener('touchend', onTouchEnd);
     }, { passive: false });
     
-    // Eventos de ratón
     celda.addEventListener('mousedown', (e) => {
         e.preventDefault();
         iniciarSeleccion(celda);
@@ -2644,31 +2614,87 @@ function renderizarListaEncuestas() {
                         <div class="encuesta-avatar">${iniciales}</div>
                         <div class="encuesta-info">
                             <h4>${profesor.nombre || 'Nombre no especificado'}</h4>
-                            <p><i class="fas fa-envelope"></i> ${profesor.correo || 'Sin correo'}</p>
+                            <p>
+                                <i class="fas fa-envelope"></i> ${profesor.correo || 'Sin correo'}
+                                <i class="fas fa-id-card" style="margin-left: 10px;"></i> ${profesor.codigo || 'Sin clave'}
+                                <i class="fas fa-phone" style="margin-left: 10px;"></i> ${profesor.telefono || 'Sin teléfono'}
+                            </p>
                         </div>
                     </div>
-                    <span class="encuesta-badge badge-enviada">Inscripción</span>
+                    <span class="encuesta-badge badge-enviada">Inscripción Verano</span>
                 </div>
+                
                 <div class="encuesta-resumen" onclick="toggleEncuestaDetalle('enc-${index}')">
+                    <span class="resumen-item"><i class="fas fa-calendar"></i> ${fecha.split(',')[0]}</span>
                     <span class="resumen-item"><i class="fas fa-book"></i> ${enc.materias?.length || 0} cursos</span>
                     <span class="resumen-item"><i class="fas fa-clock"></i> ${enc.horarios?.length || 0} horarios</span>
+                    <span class="resumen-item"><i class="fas fa-briefcase"></i> ${profesor.tipoPlaza || 'Plaza no especificada'}</span>
                 </div>
+                
                 <div class="encuesta-footer" onclick="toggleEncuestaDetalle('enc-${index}')">
                     <span><i class="far fa-clock"></i> ${fecha}</span>
                 </div>
+                
                 <div class="encuesta-detalles" id="enc-${index}">
                     <div class="detalle-seccion">
-                        <h5><i class="fas fa-user-graduate"></i> Datos del profesor</h5>
-                        <p><strong>Teléfono:</strong> ${profesor.telefono || 'No especificado'}</p>
-                        <p><strong>Clave:</strong> ${profesor.codigo || 'No especificada'}</p>
-                        <p><strong>Tipo de plaza:</strong> ${profesor.tipoPlaza || 'No especificada'}</p>
-                        ${profesor.horasPlaza ? `<p><strong>Horas:</strong> ${profesor.horasPlaza}</p>` : ''}
+                        <h5><i class="fas fa-user-graduate"></i> Datos completos del profesor</h5>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                            <div><strong><i class="fas fa-user"></i> Nombre:</strong><br>${profesor.nombre || 'No especificado'}</div>
+                            <div><strong><i class="fas fa-envelope"></i> Correo:</strong><br>${profesor.correo || 'No especificado'}</div>
+                            <div><strong><i class="fas fa-id-card"></i> Clave docente:</strong><br>${profesor.codigo || 'No especificada'}</div>
+                            <div><strong><i class="fas fa-phone"></i> Teléfono:</strong><br>${profesor.telefono || 'No especificado'}</div>
+                            <div><strong><i class="fas fa-briefcase"></i> Tipo de plaza:</strong><br>${formatearPlaza(profesor.tipoPlaza, profesor.horasPlaza)}</div>
+                        </div>
                     </div>
+                    
                     <div class="detalle-seccion">
                         <h5><i class="fas fa-book-open"></i> Cursos seleccionados</h5>
                         <div class="detalle-materias">
-                            ${enc.materias?.map(m => `<div class="detalle-materia-item"><strong>${m.nombre}</strong><br><small>${m.carreras?.map(c => `${c.carrera} - Sem ${c.semestre}${c.horas ? ` (${c.horas}h)` : ''}`).join(', ')}</small><div><small>Nivel: ${m.nivel || 'No especificado'}</small></div></div>`).join('') || 'No hay cursos seleccionados'}
+        `;
+        
+        if (enc.materias && enc.materias.length > 0) {
+            enc.materias.forEach(m => {
+                const carrerasTexto = m.carreras ? m.carreras.map(c => {
+                    let texto = `${c.carrera} - Sem ${c.semestre}`;
+                    if (c.horas && c.horas !== null) texto += ` (${c.horas} h/sem)`;
+                    return texto;
+                }).join(', ') : 'Sin carrera';
+                const nivelTexto = { alta: 'Alta', media: 'Media', baja: 'Baja' }[m.nivel] || 'No especificado';
+                const nivelColor = { alta: '#e74c3c', media: '#f39c12', baja: '#7f8c8d' }[m.nivel] || '#7f8c8d';
+                
+                html += `
+                    <div class="detalle-materia-item">
+                        <strong>${m.nombre}</strong>
+                        <small>${carrerasTexto}</small>
+                        <div><small style="color: ${nivelColor};">Nivel: ${nivelTexto}</small></div>
+                    </div>
+                `;
+            });
+        } else {
+            html += '<div class="detalle-materia-item">No hay cursos seleccionados</div>';
+        }
+        
+        html += `
                         </div>
+                    </div>
+                    
+                    <div class="detalle-seccion">
+                        <h5><i class="fas fa-clock"></i> Horarios seleccionados</h5>
+        `;
+        
+        if (enc.horarios && enc.horarios.length > 0) {
+            html += generarTablaHorarios(enc.horarios);
+        } else {
+            html += `
+                <div class="detalle-horarios">
+                    <div style="color: #6c757d; font-style: italic; padding: 15px; text-align: center; border: 1px dashed #dee2e6; border-radius: 8px;">
+                        <i class="fas fa-clock"></i> No hay horarios seleccionados
+                    </div>
+                </div>
+            `;
+        }
+        
+        html += `
                     </div>
                 </div>
             </div>
@@ -2678,6 +2704,127 @@ function renderizarListaEncuestas() {
     html += '</div>';
     container.innerHTML = html;
     renderizarPaginacion();
+}
+
+function formatearPlaza(tipo, horas) {
+    const plazas = {
+        'tiempo_completo': 'Tiempo completo',
+        'tres_cuartos': '3/4 de tiempo',
+        'medio_tiempo': 'Medio tiempo',
+        'por_horas': 'Por horas-base',
+        'honorarios': 'Honorarios',
+        'nuevo_ingreso': 'Nuevo ingreso'
+    };
+    let texto = plazas[tipo] || tipo || 'No especificada';
+    if (tipo === 'por_horas' && horas) {
+        texto += ` (${horas} horas/sem)`;
+    }
+    return texto;
+}
+
+function generarTablaHorarios(horarios) {
+    const horariosPorDia = {
+        'Lunes': [],
+        'Martes': [],
+        'Miércoles': [],
+        'Jueves': [],
+        'Viernes': []
+    };
+    
+    horarios.forEach(h => {
+        const diaNormalizado = h.dia === 'Miercoles' ? 'Miércoles' : h.dia;
+        if (horariosPorDia[diaNormalizado]) {
+            horariosPorDia[diaNormalizado].push(parseInt(h.hora));
+        }
+    });
+    
+    Object.keys(horariosPorDia).forEach(dia => {
+        horariosPorDia[dia].sort((a, b) => a - b);
+    });
+    
+    let horaMin = 23, horaMax = 0;
+    let hayHorarios = false;
+    
+    Object.values(horariosPorDia).forEach(horas => {
+        if (horas.length > 0) {
+            hayHorarios = true;
+            horas.forEach(h => {
+                horaMin = Math.min(horaMin, h);
+                horaMax = Math.max(horaMax, h);
+            });
+        }
+    });
+    
+    if (!hayHorarios) {
+        return `<div class="detalle-horarios"><div style="color: #6c757d; font-style: italic; padding: 15px; text-align: center;">No hay horarios seleccionados</div></div>`;
+    }
+    
+    horaMin = Math.max(7, horaMin - 1);
+    horaMax = Math.min(22, horaMax + 1);
+    
+    let html = `
+        <div class="detalle-horarios">
+            <div class="tabla-horarios-detalle" style="margin-top: 10px;">
+                <div class="header-row">
+                    <div class="hora-cell">Hora</div>
+                    <div class="dias-container">
+                        <div class="dia-cell">Lun</div>
+                        <div class="dia-cell">Mar</div>
+                        <div class="dia-cell">Mié</div>
+                        <div class="dia-cell">Jue</div>
+                        <div class="dia-cell">Vie</div>
+                    </div>
+                </div>
+    `;
+    
+    for (let hora = horaMin; hora <= horaMax; hora++) {
+        const horaInicio = hora;
+        const horaFin = hora + 1;
+        const horaStr = horaInicio + ':00-' + horaFin + ':00';
+        
+        html += `
+            <div class="data-row">
+                <div class="hora-data">${horaStr}</div>
+                <div class="dias-data-container">
+                    <div class="dia-data ${horariosPorDia['Lunes'].includes(hora) ? 'seleccionado' : ''}">
+                        ${horariosPorDia['Lunes'].includes(hora) ? '✓' : ''}
+                    </div>
+                    <div class="dia-data ${horariosPorDia['Martes'].includes(hora) ? 'seleccionado' : ''}">
+                        ${horariosPorDia['Martes'].includes(hora) ? '✓' : ''}
+                    </div>
+                    <div class="dia-data ${horariosPorDia['Miércoles'].includes(hora) ? 'seleccionado' : ''}">
+                        ${horariosPorDia['Miércoles'].includes(hora) ? '✓' : ''}
+                    </div>
+                    <div class="dia-data ${horariosPorDia['Jueves'].includes(hora) ? 'seleccionado' : ''}">
+                        ${horariosPorDia['Jueves'].includes(hora) ? '✓' : ''}
+                    </div>
+                    <div class="dia-data ${horariosPorDia['Viernes'].includes(hora) ? 'seleccionado' : ''}">
+                        ${horariosPorDia['Viernes'].includes(hora) ? '✓' : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    html += `
+            </div>
+            <div style="display: flex; gap: 20px; margin-top: 15px; padding: 8px 12px; background: #f8f9fa; border-radius: 20px; font-size: 0.75rem;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="width: 16px; height: 16px; background: var(--itc-azul-claro, #0077BE); border-radius: 4px;"></div>
+                    <span>Horario seleccionado</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="width: 16px; height: 16px; background: white; border: 2px solid #dee2e6; border-radius: 4px;"></div>
+                    <span>Horario disponible</span>
+                </div>
+                <div style="margin-left: auto;">
+                    <span>${horarios.length} bloque(s) seleccionados</span>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    return html;
 }
 
 function renderizarPaginacion() {
@@ -3232,7 +3379,7 @@ function actualizarModalResumen() {
             });
             htmlHorario += `</tr>`;
         }
-        htmlHorario += `</tbody></table><div class="leyenda-horarios-compacta"><span class="leyenda-item"><span class="cuadrado muestra-ocupado"></span> Horario seleccionado</span><span class="leyenda-item"><span class="cuadrado muestra-vacio"></span> Horario disponible</span></div></div>`;
+        htmlHorario += `</tbody></td><div class="leyenda-horarios-compacta"><span class="leyenda-item"><span class="cuadrado muestra-ocupado"></span> Horario seleccionado</span><span class="leyenda-item"><span class="cuadrado muestra-vacio"></span> Horario disponible</span></div></div>`;
         resumenHorarios.innerHTML = htmlHorario;
     } else {
         resumenHorarios.innerHTML = '<p>No has seleccionado horarios</p>';
@@ -3521,29 +3668,444 @@ const ThemeManager = {
     }
 };
 
-function diagnosticarCarreras() {
-    console.log('=== DIAGNÓSTICO DE CARRERAS ===');
-    console.log('carrerasData:', carrerasData);
+// ===== FUNCIONES DE EXPORTACIÓN =====
+function mostrarModalExportacion() {
+    if (!todasLasEncuestas || todasLasEncuestas.length === 0) {
+        mostrarNotificacion('No hay inscripciones para exportar', 'warning');
+        return;
+    }
     
-    // Lista de claves disponibles
-    console.log('Claves en carrerasData:', Object.keys(carrerasData));
+    const modalAnterior = document.getElementById('modalExportacion');
+    if (modalAnterior) modalAnterior.remove();
     
-    // Mostrar cada carrera con su nombre
-    Object.entries(carrerasData).forEach(([key, value]) => {
-        console.log(`  ${key} → "${value.nombre}"`);
+    const modalHTML = `
+        <div class="gestion-modal" id="modalExportacion" style="z-index: 40000;">
+            <div class="gestion-contenido" style="max-width: 800px;">
+                <div class="gestion-header">
+                    <h3><i class="fas fa-download"></i> Exportar Inscripciones</h3>
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <span class="exportacion-total-seleccionadas">
+                            <i class="fas fa-check-circle"></i> <span id="contadorSeleccionadas">0</span> de ${todasLasEncuestas.length}
+                        </span>
+                        <button class="gestion-cerrar" id="cerrarExportacionBtn"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>
+                <div class="gestion-body" style="max-height: 80vh; overflow-y: auto;">
+                    <div class="exportacion-filtros-bar">
+                        <div class="filtro-grupo">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="exportFiltroNombre" placeholder="Buscar por nombre..." class="filtro-compacto">
+                        </div>
+                        <div class="filtro-grupo">
+                            <i class="fas fa-calendar-alt"></i>
+                            <select id="exportFiltroPeriodo" class="filtro-compacto">
+                                <option value="todos">Todos los períodos</option>
+                                <option value="verano">Verano 2026</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="exportacion-acciones-rapidas">
+                        <button class="btn-accion" id="seleccionarTodoBtn"><i class="fas fa-check-double"></i> Todo</button>
+                        <button class="btn-accion" id="seleccionarNadaBtn"><i class="fas fa-times"></i> Ninguno</button>
+                        <span class="separador">|</span>
+                        <span class="info-encuestas">Mostrando: <span id="exportMostrando">${todasLasEncuestas.length}</span> inscripciones</span>
+                    </div>
+                    <div class="exportacion-lista" id="exportacionListaEncuestas"></div>
+                </div>
+                <div class="gestion-footer" style="justify-content: space-between;">
+                    <button class="btn btn-secondary" id="cancelarExportacionBtn"><i class="fas fa-times"></i> Cancelar</button>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-success" id="exportarExcelBtn"><i class="fas fa-file-excel"></i> Excel</button>
+                        <button class="btn btn-danger" id="exportarPDFBtn"><i class="fas fa-file-pdf"></i> PDF</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    const modalContainer = document.createElement('div');
+    modalContainer.innerHTML = modalHTML;
+    document.body.appendChild(modalContainer.firstElementChild);
+    
+    let encuestasFiltradasExport = [...todasLasEncuestas];
+    let encuestasSeleccionadas = new Set(todasLasEncuestas.map(e => e.id));
+    
+    renderizarListaExportacionCompacta(encuestasFiltradasExport, encuestasSeleccionadas);
+    
+    document.getElementById('cerrarExportacionBtn')?.addEventListener('click', () => {
+        document.getElementById('modalExportacion').remove();
+    });
+    document.getElementById('cancelarExportacionBtn')?.addEventListener('click', () => {
+        document.getElementById('modalExportacion').remove();
     });
     
-    // Verificar primeras materias
-    console.log('\nPrimeras 5 materias con sus carreras:');
-    todasLasMaterias.slice(0, 5).forEach(m => {
-        console.log(`  ${m.nombre}:`);
-        m.info.forEach(i => {
-            console.log(`    - ${i.carrera} (Sem ${i.semestre})`);
+    const filtroNombre = document.getElementById('exportFiltroNombre');
+    const filtroPeriodo = document.getElementById('exportFiltroPeriodo');
+    
+    const actualizarFiltros = () => {
+        const termino = filtroNombre.value.toLowerCase().trim();
+        const periodo = filtroPeriodo.value;
+        
+        encuestasFiltradasExport = todasLasEncuestas.filter(enc => {
+            const nombre = enc.profesor?.nombre?.toLowerCase() || '';
+            if (termino && !nombre.includes(termino)) return false;
+            if (periodo !== 'todos' && enc.periodo !== periodo) return false;
+            return true;
         });
+        
+        document.getElementById('exportMostrando').textContent = encuestasFiltradasExport.length;
+        renderizarListaExportacionCompacta(encuestasFiltradasExport, encuestasSeleccionadas);
+    };
+    
+    filtroNombre.addEventListener('input', () => setTimeout(actualizarFiltros, 300));
+    filtroPeriodo.addEventListener('change', actualizarFiltros);
+    
+    document.getElementById('seleccionarTodoBtn')?.addEventListener('click', () => {
+        encuestasFiltradasExport.forEach(enc => encuestasSeleccionadas.add(enc.id));
+        renderizarListaExportacionCompacta(encuestasFiltradasExport, encuestasSeleccionadas);
+        document.getElementById('contadorSeleccionadas').textContent = encuestasSeleccionadas.size;
+    });
+    
+    document.getElementById('seleccionarNadaBtn')?.addEventListener('click', () => {
+        encuestasFiltradasExport.forEach(enc => encuestasSeleccionadas.delete(enc.id));
+        renderizarListaExportacionCompacta(encuestasFiltradasExport, encuestasSeleccionadas);
+        document.getElementById('contadorSeleccionadas').textContent = encuestasSeleccionadas.size;
+    });
+    
+    document.getElementById('exportarExcelBtn')?.addEventListener('click', () => {
+        const aExportar = todasLasEncuestas.filter(enc => encuestasSeleccionadas.has(enc.id));
+        if (aExportar.length === 0) {
+            mostrarNotificacion('Selecciona al menos una inscripción', 'warning');
+            return;
+        }
+        document.getElementById('modalExportacion').remove();
+        exportarAExcelPersonalizado(aExportar);
+    });
+    
+    document.getElementById('exportarPDFBtn')?.addEventListener('click', () => {
+        const aExportar = todasLasEncuestas.filter(enc => encuestasSeleccionadas.has(enc.id));
+        if (aExportar.length === 0) {
+            mostrarNotificacion('Selecciona al menos una inscripción', 'warning');
+            return;
+        }
+        document.getElementById('modalExportacion').remove();
+        exportarAPDFPersonalizado(aExportar);
     });
 }
 
-diagnosticarCarreras();
+function renderizarListaExportacionCompacta(encuestas, seleccionadas) {
+    const container = document.getElementById('exportacionListaEncuestas');
+    if (!container) return;
+    
+    if (encuestas.length === 0) {
+        container.innerHTML = `<div class="resultado-sin-resultados" style="padding: 30px; text-align: center;">
+            <i class="fas fa-search" style="font-size: 2rem; margin-bottom: 10px;"></i>
+            <p>No hay inscripciones con los filtros seleccionados</p>
+        </div>`;
+        return;
+    }
+    
+    let html = '';
+    encuestas.forEach(enc => {
+        const profesor = enc.profesor || {};
+        const fecha = enc.fecha ? new Date(enc.fecha).toLocaleDateString('es-MX') : 'N/A';
+        const estaSeleccionada = seleccionadas.has(enc.id) ? 'checked' : '';
+        const nombre = profesor.nombre || 'Nombre no especificado';
+        const correo = profesor.correo || 'Sin correo';
+        const materiasCount = enc.materias?.length || 0;
+        const horariosCount = enc.horarios?.length || 0;
+        
+        const nombreSeguro = (nombre || '').replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+        const correoSeguro = (correo || '').replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+        
+        html += `
+            <div class="exportacion-item" style="display: flex; align-items: center; padding: 12px; border-bottom: 1px solid #e0e0e0; gap: 15px;">
+                <input type="checkbox" class="exportacion-checkbox" data-id="${enc.id}" ${estaSeleccionada} style="width: 18px; height: 18px; cursor: pointer;">
+                <div style="flex: 1;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                        <strong style="font-size: 1rem;">${nombreSeguro}</strong>
+                        <span style="background: #27ae60; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem;">Verano 2026</span>
+                    </div>
+                    <div style="display: flex; gap: 15px; font-size: 0.75rem; color: #666; margin-top: 5px; flex-wrap: wrap;">
+                        <span><i class="fas fa-envelope"></i> ${correoSeguro}</span>
+                        <span><i class="fas fa-calendar"></i> ${fecha}</span>
+                        <span><i class="fas fa-book"></i> ${materiasCount} cursos</span>
+                        <span><i class="fas fa-clock"></i> ${horariosCount} horarios</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+    
+    document.querySelectorAll('.exportacion-checkbox').forEach(cb => {
+        cb.addEventListener('change', function() {
+            const id = this.dataset.id;
+            if (this.checked) {
+                seleccionadas.add(id);
+            } else {
+                seleccionadas.delete(id);
+            }
+            const contadorSpan = document.getElementById('contadorSeleccionadas');
+            if (contadorSpan) contadorSpan.textContent = seleccionadas.size;
+        });
+    });
+    
+    const contadorSpan = document.getElementById('contadorSeleccionadas');
+    if (contadorSpan) contadorSpan.textContent = seleccionadas.size;
+}
+
+async function exportarAExcelPersonalizado(encuestas) {
+    try {
+        mostrarNotificacion(`Exportando ${encuestas.length} inscripciones a Excel...`, 'info');
+        
+        const wb = XLSX.utils.book_new();
+        
+        const resumenData = [['Fecha', 'Hora', 'Profesor', 'Correo', 'Clave SIE', 'Teléfono', 'Tipo de Plaza', 'Horas', 'Cursos', 'Horarios']];
+        
+        encuestas.forEach(enc => {
+            const profesor = enc.profesor || {};
+            const fechaObj = enc.fecha ? new Date(enc.fecha) : null;
+            const fecha = fechaObj ? fechaObj.toLocaleDateString('es-MX') : 'N/A';
+            const hora = fechaObj ? fechaObj.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }) : 'N/A';
+            
+            let tipoPlaza = '';
+            switch(profesor.tipoPlaza) {
+                case 'tiempo_completo': tipoPlaza = 'Tiempo completo'; break;
+                case 'tres_cuartos': tipoPlaza = '3/4 de tiempo'; break;
+                case 'medio_tiempo': tipoPlaza = 'Medio tiempo'; break;
+                case 'por_horas': tipoPlaza = 'Por horas-base'; break;
+                case 'honorarios': tipoPlaza = 'Honorarios'; break;
+                case 'nuevo_ingreso': tipoPlaza = 'Nuevo ingreso'; break;
+                default: tipoPlaza = profesor.tipoPlaza || '';
+            }
+            
+            resumenData.push([
+                fecha, hora, profesor.nombre || '', profesor.correo || '',
+                profesor.codigo || '', profesor.telefono || '', tipoPlaza,
+                profesor.horasPlaza || '', enc.materias?.length || 0, enc.horarios?.length || 0
+            ]);
+        });
+        
+        const wsResumen = XLSX.utils.aoa_to_sheet(resumenData);
+        wsResumen['!cols'] = [{ wch: 12 }, { wch: 8 }, { wch: 35 }, { wch: 30 }, { wch: 15 }, { wch: 15 }, { wch: 20 }, { wch: 10 }, { wch: 10 }, { wch: 10 }];
+        XLSX.utils.book_append_sheet(wb, wsResumen, 'Resumen');
+        
+        const cursosData = [['Fecha', 'Hora', 'Profesor', 'Curso', 'Nivel', 'Carrera', 'Semestre', 'Horas']];
+        
+        encuestas.forEach(enc => {
+            const profesor = enc.profesor || {};
+            const fechaObj = enc.fecha ? new Date(enc.fecha) : null;
+            const fecha = fechaObj ? fechaObj.toLocaleDateString('es-MX') : 'N/A';
+            const hora = fechaObj ? fechaObj.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }) : 'N/A';
+            
+            if (enc.materias) {
+                enc.materias.forEach(m => {
+                    const nivel = { alta: 'Alta', media: 'Media', baja: 'Baja' }[m.nivel] || 'No especificado';
+                    if (m.carreras && m.carreras.length > 0) {
+                        m.carreras.forEach(c => {
+                            cursosData.push([
+                                fecha, hora, profesor.nombre || '', m.nombre, nivel,
+                                c.carrera || '', c.semestre || '', c.horas || ''
+                            ]);
+                        });
+                    } else {
+                        cursosData.push([fecha, hora, profesor.nombre || '', m.nombre, nivel, '', '', '']);
+                    }
+                });
+            }
+        });
+        
+        const wsCursos = XLSX.utils.aoa_to_sheet(cursosData);
+        wsCursos['!cols'] = [{ wch: 12 }, { wch: 8 }, { wch: 35 }, { wch: 40 }, { wch: 12 }, { wch: 30 }, { wch: 10 }, { wch: 10 }];
+        XLSX.utils.book_append_sheet(wb, wsCursos, 'Cursos');
+        
+        const horariosData = [['Fecha', 'Hora', 'Profesor', 'Día', 'Bloque Horario']];
+        
+        encuestas.forEach(enc => {
+            const profesor = enc.profesor || {};
+            const fechaObj = enc.fecha ? new Date(enc.fecha) : null;
+            const fecha = fechaObj ? fechaObj.toLocaleDateString('es-MX') : 'N/A';
+            const hora = fechaObj ? fechaObj.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }) : 'N/A';
+            
+            if (enc.horarios) {
+                enc.horarios.forEach(h => {
+                    horariosData.push([fecha, hora, profesor.nombre || '', h.dia || '', h.texto || '']);
+                });
+            }
+        });
+        
+        const wsHorarios = XLSX.utils.aoa_to_sheet(horariosData);
+        wsHorarios['!cols'] = [{ wch: 12 }, { wch: 8 }, { wch: 35 }, { wch: 12 }, { wch: 20 }];
+        XLSX.utils.book_append_sheet(wb, wsHorarios, 'Horarios');
+        
+        const fecha = new Date().toISOString().split('T')[0];
+        XLSX.writeFile(wb, `Inscripciones_Verano_${fecha}_${encuestas.length}.xlsx`);
+        
+        mostrarNotificacion(`Excel generado: ${encuestas.length} inscripciones`, 'success');
+    } catch (error) {
+        console.error('Error exportando a Excel:', error);
+        mostrarNotificacion('Error al generar Excel', 'error');
+    }
+}
+
+async function exportarAPDFPersonalizado(encuestas) {
+    try {
+        mostrarNotificacion(`Exportando ${encuestas.length} inscripciones a PDF...`, 'info');
+        
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('portrait', 'mm', 'a4');
+        
+        for (let i = 0; i < encuestas.length; i++) {
+            if (i > 0) doc.addPage();
+            
+            const enc = encuestas[i];
+            const profesor = enc.profesor || {};
+            let yPos = 20;
+            
+            doc.setFontSize(16);
+            doc.setTextColor(0, 59, 111);
+            doc.text('INSCRIPCIÓN CURSOS DE VERANO', 105, yPos, { align: 'center' });
+            yPos += 10;
+            
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            const fecha = enc.fecha ? new Date(enc.fecha).toLocaleString('es-MX') : 'Fecha desconocida';
+            doc.text(`Fecha de registro: ${fecha}`, 105, yPos, { align: 'center' });
+            yPos += 15;
+            
+            doc.setFillColor(240, 248, 255);
+            doc.rect(15, yPos, 180, 50, 'F');
+            doc.setDrawColor(0, 119, 190);
+            doc.setLineWidth(0.5);
+            doc.rect(15, yPos, 180, 50, 'D');
+            
+            doc.setFontSize(12);
+            doc.setTextColor(0, 59, 111);
+            doc.text('DATOS DEL PROFESOR', 20, yPos + 8);
+            
+            doc.setFontSize(10);
+            doc.setTextColor(51, 51, 51);
+            doc.text(`Nombre: ${profesor.nombre || 'No especificado'}`, 20, yPos + 20);
+            doc.text(`Correo: ${profesor.correo || 'No especificado'}`, 20, yPos + 30);
+            doc.text(`Clave: ${profesor.codigo || 'No especificada'}`, 20, yPos + 40);
+            doc.text(`Teléfono: ${profesor.telefono || 'No especificado'}`, 110, yPos + 20);
+            doc.text(`Tipo de plaza: ${profesor.tipoPlaza || 'No especificada'}`, 110, yPos + 30);
+            
+            yPos += 60;
+            
+            doc.setFillColor(240, 248, 255);
+            doc.rect(15, yPos, 180, 8, 'F');
+            doc.setFontSize(11);
+            doc.setTextColor(0, 59, 111);
+            doc.text('CURSOS SELECCIONADOS', 20, yPos + 6);
+            yPos += 12;
+            
+            if (enc.materias && enc.materias.length > 0) {
+                enc.materias.forEach((m, idx) => {
+                    if (yPos > 260) {
+                        doc.addPage();
+                        yPos = 20;
+                    }
+                    const nivel = { alta: 'Alta', media: 'Media', baja: 'Baja' }[m.nivel] || 'No especificado';
+                    const carreras = m.carreras ? m.carreras.map(c => `${c.carrera} (Sem ${c.semestre})${c.horas ? ` ${c.horas}h` : ''}`).join(', ') : '';
+                    
+                    doc.setFontSize(9);
+                    doc.setTextColor(51, 51, 51);
+                    doc.text(`${idx + 1}. ${m.nombre} - Nivel: ${nivel}`, 20, yPos);
+                    if (carreras) {
+                        doc.setFontSize(8);
+                        doc.setTextColor(100, 100, 100);
+                        doc.text(`   ${carreras}`, 20, yPos + 5);
+                        yPos += 10;
+                    } else {
+                        yPos += 6;
+                    }
+                });
+                yPos += 5;
+            } else {
+                doc.text('No hay cursos seleccionados', 20, yPos);
+                yPos += 10;
+            }
+            
+            doc.setFillColor(240, 248, 255);
+            doc.rect(15, yPos, 180, 8, 'F');
+            doc.setFontSize(11);
+            doc.setTextColor(0, 59, 111);
+            doc.text('HORARIOS SELECCIONADOS', 20, yPos + 6);
+            yPos += 15;
+            
+            if (enc.horarios && enc.horarios.length > 0) {
+                const horariosPorDia = { Lunes: [], Martes: [], Miércoles: [], Jueves: [], Viernes: [] };
+                enc.horarios.forEach(h => {
+                    const dia = h.dia === 'Miercoles' ? 'Miércoles' : h.dia;
+                    if (horariosPorDia[dia]) horariosPorDia[dia].push(parseInt(h.hora));
+                });
+                
+                Object.keys(horariosPorDia).forEach(dia => horariosPorDia[dia].sort((a, b) => a - b));
+                
+                doc.setFontSize(8);
+                doc.setTextColor(51, 51, 51);
+                
+                const dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+                let xPos = 20;
+                dias.forEach(dia => {
+                    doc.text(dia.substring(0, 3), xPos, yPos);
+                    xPos += 30;
+                });
+                yPos += 5;
+                
+                for (let hora = 7; hora <= 21; hora++) {
+                    xPos = 20;
+                    dias.forEach(dia => {
+                        const seleccionado = horariosPorDia[dia]?.includes(hora);
+                        if (seleccionado) {
+                            doc.setFillColor(0, 119, 190);
+                            doc.rect(xPos, yPos - 3, 25, 5, 'F');
+                            doc.setTextColor(255, 255, 255);
+                            doc.text(`${hora}-${hora + 1}`, xPos + 2, yPos);
+                        } else {
+                            doc.setDrawColor(200, 200, 200);
+                            doc.rect(xPos, yPos - 3, 25, 5, 'S');
+                            doc.setTextColor(150, 150, 150);
+                            doc.text(`${hora}-${hora + 1}`, xPos + 2, yPos);
+                        }
+                        xPos += 30;
+                    });
+                    yPos += 6;
+                    if (yPos > 270) {
+                        doc.addPage();
+                        yPos = 20;
+                    }
+                }
+                yPos += 5;
+                doc.setTextColor(51, 51, 51);
+                doc.text(`Total de bloques seleccionados: ${enc.horarios.length}`, 20, yPos);
+            } else {
+                doc.text('No hay horarios seleccionados', 20, yPos);
+            }
+        }
+        
+        const fecha = new Date().toISOString().split('T')[0];
+        doc.save(`Inscripciones_Verano_${fecha}_${encuestas.length}.pdf`);
+        
+        mostrarNotificacion(`PDF generado: ${encuestas.length} inscripciones`, 'success');
+    } catch (error) {
+        console.error('Error exportando a PDF:', error);
+        mostrarNotificacion('Error al generar PDF', 'error');
+    }
+}
 
 // ===== INICIALIZACIÓN PRINCIPAL =====
 async function inicializarAplicacion() {
@@ -3578,7 +4140,6 @@ async function inicializarAplicacion() {
         if (borrador && (borrador.profesor?.nombre || borrador.materias?.length)) mostrarModalBorrador(borrador);
     }, 800);
     
-    // Ocultar elementos de período en verano
     if (ES_VERANO) {
         const periodoSelector = document.querySelector('.periodo-selector');
         const periodoBadge = document.getElementById('periodoBadge');
@@ -3592,17 +4153,5 @@ async function inicializarAplicacion() {
     
     ThemeManager.init();
 }
-
-// Función para exportar (simplificada)
-function mostrarModalExportacion() {
-    mostrarNotificacion('Exportación disponible en panel admin', 'info');
-}
-
-function renderizarListaExportacionCompacta() {}
-function actualizarCheckboxesCompacto() {}
-function actualizarContadorExportacionCompacto() {}
-function ordenarEncuestas() {}
-function exportarAPDFPersonalizado() {}
-function exportarAExcelPersonalizado() {}
 
 document.addEventListener('DOMContentLoaded', inicializarAplicacion);
